@@ -1,5 +1,3 @@
-# Enforce compatible Python version
-python_version >=3.11,<3.12
 
 Flask==2.3.3
 gunicorn==21.2.0
