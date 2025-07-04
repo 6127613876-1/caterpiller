@@ -52,17 +52,18 @@ google_bp = make_google_blueprint(
 
 app.register_blueprint(google_bp, url_prefix="/login")
 
-# Firebase config
+# Firebase config from .env
 firebase_config = {
-    "apiKey": "AIzaSyBCHKvaapkyDiYSPvIS-XYatw8_4oWUEBI",
-    "authDomain": "caterpillar-fa475.firebaseapp.com",
-    "databaseURL": "https://caterpillar-fa475-default-rtdb.firebaseio.com",
-    "projectId": "caterpillar-fa475",
-    "storageBucket": "caterpillar-fa475.appspot.com",
-    "messagingSenderId": "1049817279301",
-    "appId": "1:1049817279301:web:a270bd2145757e9a88ac2c",
-    "measurementId": "G-CFJ41VV7M7"
+    "apiKey": os.getenv("FIREBASE_API_KEY"),
+    "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
+    "databaseURL": os.getenv("FIREBASE_DATABASE_URL"),
+    "projectId": os.getenv("FIREBASE_PROJECT_ID"),
+    "storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET"),
+    "messagingSenderId": os.getenv("FIREBASE_MESSAGING_SENDER_ID"),
+    "appId": os.getenv("FIREBASE_APP_ID"),
+    "measurementId": os.getenv("FIREBASE_MEASUREMENT_ID")
 }
+
 firebase = pyrebase.initialize_app(firebase_config)
 db = firebase.database()
 
