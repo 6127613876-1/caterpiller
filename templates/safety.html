@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Machine Safety Monitor</title>
+  <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" type="image/png">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      padding: 0;
+      margin: 0;
+    }
+
+    header {
+      background: white;
+      padding: 16px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .header-buttons a {
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 5px;
+      color: white;
+      font-size: 14px;
+      margin-left: 10px;
+    }
+
+    .btn-blue { background-color: #3b82f6; }
+    .btn-red { background-color: #ef4444; }
+
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    h2, h3 {
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    input[type="checkbox"] {
+      margin-left: 10px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background-color: #d3d838;
+      color: rgb(15, 14, 14);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #cff643;
+    }
+
+    .alert {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .alert.high { color: red; }
+    .alert.low { color: orange; }
+    .alert.none { color: green; }
+
+    .form-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .card {
+      flex: 1 1 48%;
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    #logResults {
+      margin-top: 15px;
+      background: #eef3f8;
+      padding: 10px;
+      border-radius: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    .key {
+      background: #eef3f8;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-top: 30px;
+    }
+
+    .key p {
+      margin: 5px 0;
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <h1>Machine Safety Monitor</h1>
+    <div class="header-buttons">
+      <a href="/dashboard" class="btn-blue">Back to Dashboard</a>
+      <a href="/logout" class="btn-red">Logout</a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="container">
+    <h2>🚜 Machine Safety Monitor</h2>
+
+    <!-- Seatbelt Status -->
+    <div class="section">
+      <label><strong>Seatbelt Status:</strong></label>
+      <input type="checkbox" id="seatBeltCheck"> Yes
+      <p id="seatBeltAlert" class="alert high" style="display: none;">🔴 Fasten your seatbelt!</p>
+      <audio id="seatbeltSound" loop>
+        <source src="https://www.soundjay.com/buttons/beep-07.wav" type="audio/wav">
+      </audio>
+    </div>
+
+    <!-- Proximity Hazard -->
+    <div class="section">
+      <label><strong>Proximity Hazard (in meters):</strong></label>
+      <input type="number" id="proximityInput" placeholder="Enter distance">
+      <p id="proximityAlert" class="alert"></p>
+    </div>
+
+    <!-- Hazard Key -->
+    <div class="key">
+      <strong>🚨 Hazard Levels:</strong>
+      <p><span style="color:red;">High Danger</span>: distance &lt; 20m</p>
+      <p><span style="color:orange;">Low Danger</span>: 20m ≤ distance &lt; 50m</p>
+      <p><span style="color:green;">No Danger</span>: distance ≥ 50m</p>
+    </div>
+
+    <!-- Logging & Viewing Section -->
+    <div class="form-section">
+      <!-- Log Form -->
+      <div class="card">
+        <h3>Log Machine Issue</h3>
+        <form id="logForm">
+          <label>Operator Name:</label>
+          <input type="text" id="operator" required>
+
+          <label>Machine ID:</label>
+          <input type="text" id="machineId" required>
+
+          <label>Issue Description:</label>
+          <textarea id="issue" rows="3" required></textarea>
+
+          <button type="submit">Submit Log</button>
+        </form>
+        <p id="logStatus" style="margin-top:10px;"></p>
+      </div>
+
+      <!-- View Logs -->
+      <div class="card">
+        <h3>View Logs by Machine ID</h3>
+        <input type="text" id="searchMachineId" placeholder="Enter Machine ID">
+        <button onclick="searchLogs()">Search Logs</button>
+        <div id="logResults"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const seatBeltCheck = document.getElementById('seatBeltCheck');
+    const seatBeltAlert = document.getElementById('seatBeltAlert');
+    const seatbeltSound = document.getElementById('seatbeltSound');
+
+    const proximityInput = document.getElementById('proximityInput');
+    const proximityAlert = document.getElementById('proximityAlert');
+
+    seatBeltCheck.addEventListener('change', () => {
+      if (!seatBeltCheck.checked) {
+        seatBeltAlert.style.display = 'block';
+        seatbeltSound.play();
+        alert("⚠️ Fasten your seatbelt!");
+      } else {
+        seatBeltAlert.style.display = 'none';
+        seatbeltSound.pause();
+        seatbeltSound.currentTime = 0;
+      }
+    });
+
+    proximityInput.addEventListener('input', () => {
+      const dist = parseFloat(proximityInput.value);
+      if (isNaN(dist)) {
+        proximityAlert.textContent = '';
+        proximityAlert.className = '';
+        return;
+      }
+
+      if (dist < 20) {
+        proximityAlert.textContent = '🔥 High Danger!';
+        proximityAlert.className = 'alert high';
+      } else if (dist < 50) {
+        proximityAlert.textContent = '⚠️ Low Danger!';
+        proximityAlert.className = 'alert low';
+      } else {
+        proximityAlert.textContent = '';
+        proximityAlert.className = 'alert none';
+      }
+    });
+
+    document.getElementById('logForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const operator = document.getElementById('operator').value;
+      const machineId = document.getElementById('machineId').value;
+      const issue = document.getElementById('issue').value;
+
+      fetch('/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operator, machineId, issue })
+      })
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById('logStatus').textContent = "✅ Log submitted successfully!";
+        document.getElementById('logForm').reset();
+      })
+      .catch(err => {
+        document.getElementById('logStatus').textContent = "❌ Failed to submit log.";
+      });
+    });
+
+    function searchLogs() {
+      const machineId = document.getElementById('searchMachineId').value.trim();
+      if (!machineId) {
+        document.getElementById('logResults').innerHTML = "⚠️ Please enter a Machine ID.";
+        return;
+      }
+
+      fetch(`/get_logs?machineId=${machineId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.logs.length === 0) {
+            document.getElementById('logResults').innerHTML = `❌ No logs found for Machine ID: ${machineId}`;
+          } else {
+            const html = data.logs.map(log => `<p>🗒️ ${log}</p>`).join('');
+            document.getElementById('logResults').innerHTML = `<strong>Logs for ${machineId}:</strong>${html}`;
+          }
+        })
+        .catch(err => {
+          document.getElementById('logResults').innerHTML = "❌ Error fetching logs.";
+        });
+    }
+  </script>
+</body>
+</html>

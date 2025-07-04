@@ -1,0 +1,2 @@
+[2025-07-04 02:48:03] Operator: devi, Machine ID: EX005, Issue: the left headlight is not working
+[2025-07-04 02:51:30] Operator: varshaa, Machine ID: EX004, Issue: brake not tight enough

@@ -15,8 +15,9 @@ import openpyxl
 from flask import jsonify, send_from_directory
 from flask import render_template_string
 from video_summarizer import video_data, summarize, TEMPLATE, SUMMARY_DIR
-
-
+import pickle
+from flask import Flask, request, jsonify, send_from_directory
+from datetime import datetime
 
 
 
@@ -63,7 +64,6 @@ firebase_config = {
     "appId": os.getenv("FIREBASE_APP_ID"),
     "measurementId": os.getenv("FIREBASE_MEASUREMENT_ID")
 }
-
 firebase = pyrebase.initialize_app(firebase_config)
 db = firebase.database()
 
@@ -75,6 +75,85 @@ model = genai.GenerativeModel('models/text-bison-001')
 def clean_department(dept):
     return re.sub(r'\s+', '_', dept.strip().lower())
 
+# Load the model
+with open("trained_model.pkl", "rb") as f:
+    model = pickle.load(f)
+
+# Adjustment rules
+adjustment_factors = {
+    "Foggy": 1.10,
+    "Rainy": 1.15,
+    "Dusty": 1.05
+}
+
+@app.route("/calculate-time", methods=["GET", "POST"])
+def calculate():
+    result = None
+
+    if request.method == "POST":
+        try:
+            load_cycles = int(request.form["load_cycles"])
+            environment = request.form["environment"]
+            speed = float(request.form["speed"])
+
+            input_df = pd.DataFrame([{
+                "Engine Hours": 1500,
+                "Fuel Used (L)": 5.0,
+                "Load Cycles": load_cycles,
+                "Idling Time (min)": 30,
+                "Proximity Hazard Count": 1,
+                "speed": speed,
+                "Machine ID": "EXC001",
+                "Operator ID": "OP1001",
+                "Environmental Conditions": environment,
+                "Maintenance Flag": "No"
+            }])
+
+            # Predict
+            time_sec = model.predict(input_df)[0]
+            adjusted_time_sec = time_sec * adjustment_factors.get(environment, 1.0)
+            result = round(adjusted_time_sec / 60, 2)  # minutes
+
+        except Exception as e:
+            result = ""
+
+    return render_template("time.html", result=result)
+@app.route('/safety')
+def safety():
+    return render_template('safety.html')
+
+
+@app.route('/log', methods=['POST'])
+def log_issue():
+    data = request.get_json()
+    operator = data.get('operator')
+    machine_id = data.get('machineId')
+    issue = data.get('issue')
+
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    log_entry = f"[{timestamp}] Operator: {operator}, Machine ID: {machine_id}, Issue: {issue}\n"
+
+    with open('logs.txt', 'a') as f:
+        f.write(log_entry)
+
+    return "Log saved", 200
+@app.route('/get_logs')
+def get_logs_by_machine():
+    machine_id = request.args.get('machineId', '').strip()
+    if not machine_id:
+        return jsonify({'logs': []})
+
+    logs = []
+    try:
+        with open('logs.txt', 'r') as f:
+            for line in f:
+                if f"Machine ID: {machine_id}" in line:
+                    logs.append(line.strip())
+    except FileNotFoundError:
+        logs = []
+
+    return jsonify({'logs': logs})
 
 
 @app.route('/')
@@ -458,7 +537,6 @@ def summarize_file(filename):
 @app.route('/contact')
 def contact():
     return render_template('emailjs.html')
-
 
 if __name__ == '__main__':
     app.run(debug=True)
