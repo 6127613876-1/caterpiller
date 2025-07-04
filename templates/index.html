@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manual QA Chatbot</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📘 Manual QA Chatbot</h1>
+        <form id="chat-form">
+            <input type="text" id="question" placeholder="Ask your question..." autocomplete="off" required>
+            <button type="submit">Ask</button>
+        </form>
+        <div id="response"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById("chat-form");
+        const questionInput = document.getElementById("question");
+        const responseDiv = document.getElementById("response");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const question = questionInput.value;
+            responseDiv.innerHTML = "<p><strong>You:</strong> " + question + "</p><p><em>Assistant is thinking...</em></p>";
+
+            const res = await fetch("/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question })
+            });
+
+            const data = await res.json();
+            responseDiv.innerHTML = "<p><strong>You:</strong> " + question + "</p><p><strong>Assistant:</strong> " + data.answer + "</p>";
+            questionInput.value = "";
+        });
+    </script>
+</body>
+</html>
