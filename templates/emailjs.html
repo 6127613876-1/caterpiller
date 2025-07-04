@@ -3,13 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <title>Machine Issue Report</title>
-  <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" type="image/png">
-
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
+      margin: 0;
+      padding-top: 80px; /* Space for fixed header */
+      background: #f0f2f5;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: white;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .header-buttons a {
+      background-color: #3b82f6;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 4px;
+      text-decoration: none;
+      margin-left: 10px;
+    }
+
+    .header-buttons a:last-child {
+      background-color: #ef4444;
     }
 
     form {
@@ -41,6 +74,7 @@
 
     h2 {
       text-align: center;
+      margin-top: 20px;
     }
 
     #overlay {
@@ -109,12 +143,16 @@
       0% { transform: scale(0); opacity: 0;}
       100% { transform: scale(1); opacity: 1;}
     }
-
   </style>
 </head>
 <body>
-  
-  <h2>Machine Issue Report</h2>
+  <header>
+    <h2>Machine Issue Report</h2>
+    <div class="header-buttons">
+      <a href="/dashboard">Back to Dashboard</a>
+      <a href="/logout">Logout</a>
+    </div>
+  </header>
 
   <form id="contact-form">
     <input type="text" name="operator_name" placeholder="Operator Name" required />
@@ -151,8 +189,8 @@
         <div>Sending...</div>
       `;
 
-      const serviceID = 'service_8xn1bc2';     // Your EmailJS service ID
-      const templateID = 'template_qhn3oq7';   // Your EmailJS template ID
+      const serviceID = 'service_8xn1bc2';
+      const templateID = 'template_qhn3oq7';
 
       emailjs.sendForm(serviceID, templateID, this)
         .then(() => {
@@ -168,178 +206,5 @@
         });
     });
   </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Machine Issue Report</title>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding-top: 100px; /* offset for fixed header */
-      background-color: #f8fafc;
-    }
-
-    form {
-      max-width: 400px;
-      margin: auto;
-      background: #f9f9f9;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    input, textarea, button {
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-      font-size: 14px;
-    }
-
-    button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    #overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      color: white;
-      font-size: 20px;
-      z-index: 999;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    #overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .spinner {
-      border: 4px solid rgba(255,255,255,0.3);
-      border-top: 4px solid white;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 10px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg);}
-      100% { transform: rotate(360deg);}
-    }
-
-    .checkmark {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      border: 4px solid #4CAF50;
-      position: relative;
-      animation: pop 0.3s ease forwards;
-      margin-bottom: 10px;
-    }
-
-    .checkmark:after {
-      content: "";
-      position: absolute;
-      left: 14px;
-      top: 6px;
-      width: 12px;
-      height: 24px;
-      border-right: 4px solid #4CAF50;
-      border-bottom: 4px solid #4CAF50;
-      transform: rotate(45deg);
-      transform-origin: center;
-    }
-
-    @keyframes pop {
-      0% { transform: scale(0); opacity: 0;}
-      100% { transform: scale(1); opacity: 1;}
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Header -->
-  <header class="bg-white shadow w-full px-6 py-4 flex justify-between items-center fixed top-0 left-0 z-10">
-    <h1 class="text-2xl font-bold">Machine Issue Report</h1>
-    <div class="space-x-4">
-      <a href="/dashboard" class="bg-blue-500 text-white px-4 py-2 rounded">Back to Dashboard</a>
-      <a href="/logout" class="bg-red-500 text-white px-4 py-2 rounded">Logout</a>
-    </div>
-  </header>
-
-  
-  <!-- Overlay -->
-  <div id="overlay">
-    <div id="overlay-content">
-      <div class="spinner"></div>
-      <div>Sending...</div>
-    </div>
-  </div>
-
-  <script>
-    (function(){
-      emailjs.init("uNs2S2CJhP7Se3ZXm"); // Replace with your actual public key
-    })();
-
-    const overlay = document.getElementById('overlay');
-    const overlayContent = document.getElementById('overlay-content');
-    const form = document.getElementById('contact-form');
-
-    form.addEventListener('submit', function(event) {
-      event.preventDefault();
-
-      overlay.classList.add('active');
-      overlayContent.innerHTML = `
-        <div class="spinner"></div>
-        <div>Sending...</div>
-      `;
-
-      const serviceID = 'service_8xn1bc2';     // Your EmailJS service ID
-      const templateID = 'template_qhn3oq7';   // Your EmailJS template ID
-
-      emailjs.sendForm(serviceID, templateID, this)
-        .then(() => {
-          form.reset();
-          overlayContent.innerHTML = `
-            <div class="checkmark"></div>
-            <div>Sent!</div>
-          `;
-          setTimeout(() => overlay.classList.remove('active'), 2000);
-        }, (err) => {
-          alert('Failed to send email.\n' + JSON.stringify(err));
-          overlay.classList.remove('active');
-        });
-    });
-  </script>
-
 </body>
 </html>
