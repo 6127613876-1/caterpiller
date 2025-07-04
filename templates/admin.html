@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" type="image/png">
+
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+</head>
+<body class="container mt-5">
+  <h2 class="mb-4">Admin – User Management</h2>
+  <a href="/logout" class="btn btn-secondary mb-3">Logout</a>
+
+  <table class="table table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Department</th>
+        <th>Role</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+        <tr>
+          <td>{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            {% if user.role != 'admin' %}
+              <form method="POST" action="/update_user/{{ user.key }}" class="d-flex align-items-center">
+                <select name="department" class="form-select form-select-sm me-2" required>
+                  {% for dept in task_data.keys() %}
+                    <option value="{{ dept }}" {% if user.department == dept %}selected{% endif %}>{{ dept }}</option>
+                  {% endfor %}
+                </select>
+          </td>
+          <td>{{ user.role }}</td>
+          <td>
+                <button type="submit" class="btn btn-sm btn-success me-1">Update</button>
+              </form>
+              <a href="/delete_user/{{ user.key }}" class="btn btn-danger btn-sm">Delete</a>
+            {% else %}
+              {{ user.department }}
+          </td>
+          <td>{{ user.role }}</td>
+          <td><span class="text-muted">Protected</span></td>
+            {% endif %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3 class="mt-5">Edit Department Tasks</h3>
+
+  <form method="POST" action="/admin">
+    <div class="mb-4">
+      <label for="department" class="form-label">Select Department</label>
+      <select name="department" class="form-select" required onchange="this.form.submit()">
+        <option value="" disabled {% if not selected_dept %}selected{% endif %}>Select</option>
+        {% for dept in task_data.keys() %}
+          <option value="{{ dept }}" {% if selected_dept == dept %}selected{% endif %}>{{ dept }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+
+  {% if selected_dept %}
+  <form method="POST" action="/update_tasks">
+    <input type="hidden" name="department" value="{{ selected_dept }}">
+    <div class="mb-3">
+      <label for="tasks" class="form-label">Tasks for {{ selected_dept }}</label>
+      <textarea name="tasks" rows="10" class="form-control" required>{{ task_text }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Update Tasks</button>
+  </form>
+  {% endif %}
+</body>
+</html>

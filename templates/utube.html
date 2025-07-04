@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+  <title>CAT Video Library</title>
+  
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>CAT Equipment Video Library</h1>
+    <div class="button-group">
+      <button onclick="loadVideos('wheel_tractor')">Wheel Tractor</button>
+      <button onclick="loadVideos('articulated_trucks')">Articulated Trucks</button>
+      <button onclick="loadVideos('mining_shovels')">Mining Shovels</button>
+      <button onclick="loadVideos('road_reclaimer')">Road Reclaimer</button>
+    </div>
+    <div id="videoContainer" class="videos"></div>
+  </div>
+
+  <script src="videos.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select Department</title>
+  <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" type="image/png">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
+    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Please select your department</h2>
+    <form method="POST" class="space-y-4">
+      <div>
+        <label class="block text-gray-700 mb-2" for="department">Department</label>
+        <select name="department" id="department" required class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">-- Choose Department --</option>
+          <option value="earthmoving_equipment">Earthmoving Equipment</option>
+          <option value="construction_equipment_backhoe_loader">Construction Equipment (Backhoe Loader)</option>
+          <option value="power_systems_genset">Power Systems (Genset)</option>
+        </select>
+      </div>
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded">
+        Submit
+      </button>
+    </form>
+  </div>
+</body>
+</html>

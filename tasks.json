@@ -1,0 +1,26 @@
+{
+    "departmenttasks": {
+      "earthmoving_equipment": [
+        "Perform daily pre-start inspection (fluids, hydraulics, undercarriage)",
+        "Operate excavator for trenching with grade control system monitoring",
+        "Level worksite using motor grader to design specification",
+        "Load dump trucks using wheel loader, maintaining cycle time efficiency",
+        "Complete and log maintenance schedule (greasing, filter replacement)"
+      ],
+      "powersystems": [
+        "Conduct start-up checks and verify voltage/frequency settings",
+        "Inspect fuel system for leaks and contamination",
+        "Perform oil and filter change at scheduled intervals",
+        "Test and document load-bank performance to verify capacity",
+        "Respond to alarms and troubleshoot generator faults"
+      ],
+      "constructionequipment": [
+        "Inspect hydraulic lines and cylinders for leaks/damage",
+        "Dig trenches or backfill according to plan specs",
+        "Swap and secure attachments (buckets, forks) safely",
+        "Perform operational checks of boom, swing, and loader arms",
+        "Log operator hours and maintenance issues in daily report"
+      ]
+    }
+  }
+  

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" type="image/png">
+
+    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      body {
+        background-color: #f8fafc;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen text-gray-800 flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow p-4 flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-bold">Dashboard</h1>
+          <p class="text-gray-600 text-sm mt-1">Welcome, {{ name }}</p>
+
+        </div>
+        <div class="space-x-4">
+          <a href="/ask-bot" class="bg-purple-600 text-white px-4 py-2 rounded">Ask Doubt About Machines</a>
+          <form action="/simulate" method="POST" class="inline">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Simulate</button>
+          </form>
+          <form action="/calculate-time" method="POST" class="inline">
+            <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded">Calculate Time</button>
+          </form>
+          <a href="/video-summary" class="bg-green-500 text-white px-4 py-2 rounded">Learning Hub</a>
+          <a href="/contact" class="bg-indigo-500 text-white px-4 py-2 rounded">Contact</a>
+          <a href="/logout" class="bg-red-500 text-white px-4 py-2 rounded">Logout</a>
+        </div>
+      </header>
+      
+
+    <!-- Dashboard Container -->
+    <div class="flex-1 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
+      <!-- Task Checklist -->
+      <div class="col-span-full bg-white p-4 rounded shadow">
+        <h2 class="text-xl font-semibold mb-2">Your Tasks</h2>
+        <ul id="taskList" class="space-y-2"></ul>
+        <button onclick="localStorage.removeItem('taskStates'); location.reload();" class="mt-4 bg-red-500 text-white px-4 py-2 rounded">
+            🔄 Reset Task Progress
+          </button>
+      </div>
+     
+      
+
+      <!-- Bar Chart -->
+      <div class="bg-white p-4 rounded shadow">
+        <h2 class="text-xl font-semibold mb-2">Task Progress (Bar Chart)</h2>
+        <canvas id="barChart" height="200"></canvas>
+      </div>
+
+      <!-- Pie Chart -->
+      <div class="bg-white p-4 rounded shadow">
+        <h2 class="text-xl font-semibold mb-2">Task Completion (Pie Chart)</h2>
+        <canvas id="pieChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <script>
+        const userEmail = "{{ email }}";
+        const userDepartment = "{{ department }}";
+        const encodedDepartment = encodeURIComponent(
+            userDepartment.toLowerCase().replace(/\s+/g, "_")
+        );
+
+        const firebaseUrl = `https://caterpillar-fa475-default-rtdb.firebaseio.com/department_tasks/${encodedDepartment}.json`;
+
+        
+
+        let taskStates = JSON.parse(localStorage.getItem("taskStates") || "{}");
+
+      let tasks = [];
+
+      async function fetchTasks() {
+        try {
+          const response = await fetch(firebaseUrl);
+          const data = await response.json();
+      
+          if (data?.error) {
+            document.getElementById("taskList").innerHTML = `<li class="text-red-600 font-semibold">${data.error}</li>`;
+            tasks = ["Permission denied"];
+          } else {
+            tasks = Object.values(data || {});
+          }
+      
+          renderTaskList();
+          updateCharts();
+        } catch (error) {
+          console.error("Error fetching tasks:", error);
+          document.getElementById("taskList").innerHTML = `<li class="text-red-600 font-semibold">Error loading tasks</li>`;
+        }
+      }
+      
+
+      function renderTaskList() {
+  const taskList = document.getElementById("taskList");
+  taskList.innerHTML = "";
+  tasks.forEach((task) => {
+    if (!(task in taskStates)) taskStates[task] = false;
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <label class="flex items-center space-x-2">
+        <input 
+          type="checkbox"
+          class="form-checkbox h-5 w-5 text-green-500"
+          ${taskStates[task] ? "checked" : ""}
+          onchange="handleToggle('${task}')"
+        >
+        <span>${task}</span>
+      </label>
+    `;
+    taskList.appendChild(li);
+  });
+
+  localStorage.setItem("taskStates", JSON.stringify(taskStates));  // 🟡 Save on render
+}
+
+      
+
+      const barCtx = document.getElementById("barChart").getContext("2d");
+      const pieCtx = document.getElementById("pieChart").getContext("2d");
+      let barChart, pieChart;
+
+      function updateCharts() {
+        const labels = tasks;
+        const values = tasks.map(task => taskStates[task] ? 1 : 0);
+        const completed = values.reduce((sum, v) => sum + v, 0);
+
+        if (barChart) barChart.destroy();
+        if (pieChart) pieChart.destroy();
+
+        barChart = new Chart(barCtx, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [{
+              label: "Task Completion (1 = Done, 0 = Pending)",
+              data: values,
+              backgroundColor: values.map(v => v ? '#22c55e' : '#e5e7eb')
+            }]
+          },
+          options: { responsive: true, indexAxis: 'y' }
+        });
+
+        pieChart = new Chart(pieCtx, {
+          type: "pie",
+          data: {
+            labels: ["Completed", "Pending"],
+            datasets: [{
+              data: [completed, tasks.length - completed],
+              backgroundColor: ["#22c55e", "#e5e7eb"]
+            }]
+          },
+          options: { responsive: true }
+        });
+      }
+
+      function handleToggle(task) {
+        taskStates[task] = !taskStates[task];
+        localStorage.setItem("taskStates", JSON.stringify(taskStates));  // ✅ persist to localStorage
+        updateCharts();
+      }
+      
+
+      fetchTasks();
+    </script>
+  </body>
+</html>
