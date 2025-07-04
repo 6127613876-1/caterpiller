@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, url_for
-import pyrebase, dropbox, os, bcrypt, json
+import  dropbox, os, bcrypt, json
+import pyrebase4 as pyrebase
 import google.generativeai as genai
 from dotenv import load_dotenv
 from flask_dance.contrib.google import make_google_blueprint, google
